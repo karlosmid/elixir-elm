@@ -2,6 +2,7 @@ defmodule Croatian.Basketball do
   @moduledoc "Helps Croatian basketball teams in candidate selection."
   @treshold 180
   @doc "Based on candidate height, determines candidate team position."
+  @spec position(integer()) :: String.t()
   def position height do
     cond do
       height > 205 -> "center"
@@ -11,6 +12,7 @@ defmodule Croatian.Basketball do
     end
   end
   @doc "Based on candidate height, invites or rejects candidate."
+  @spec trials(integer()) :: String.t()
   def trials height do
     if height > @treshold do "invite candidate"
     else "reject candidate"
