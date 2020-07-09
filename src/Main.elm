@@ -10,4 +10,11 @@ planck = 6.62e-34
 elmDeveloper : Bool
 elmDeveloper = True
 
-main = text greeting
+helloThere : String -> String
+helloThere name =
+    "Hello " ++ name
+numberOfLegs : String -> (Int -> String)
+numberOfLegs spieces amount =
+  spieces ++ " has " ++ Debug.toString amount ++ " legs."
+
+main = text (numberOfLegs "Dog" 4)
