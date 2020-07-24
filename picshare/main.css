@@ -1,0 +1,119 @@
+body {
+  width: auto;
+  max-width: 90vw;
+  margin: auto;
+  background: #eee;
+}
+
+#main {
+  background: white;
+  padding: 0;
+  margin: 0;
+  min-height: 100vh;
+  padding-bottom: 2em;
+}
+
+.header {
+  text-align: center;
+}
+
+.header h1 {
+  padding: 0.25em;
+  font-family: Helvetica neue;
+}
+
+.content-flow {
+}
+
+.photo-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
+.content-flow .detailed-photo {
+  padding: 0.25em;
+  border: 1px solid darkgrey;
+  background: white;
+  margin: 1em;
+}
+
+.content-flow .detailed-photo img {
+  width: 100%;
+  max-height: 250px;
+  max-width: 250px;
+}
+
+.content-flow .detailed-photo .photo-info {
+  text-align: left;
+  padding-left: 0.25em;
+  padding-right: 0.25em;
+  font-style: italic;
+}
+
+.like-button {
+  float: right;
+  color: darkred;
+  cursor: pointer;
+}
+
+.caption {
+  text-align: left;
+  padding-left: 0.25em;
+  font-style: italic;
+}
+
+ul.comments {
+  margin: 0;
+  font-style: normal;
+  list-style: none;
+  text-align: left;
+  padding-left: 0.25em;
+}
+
+h3.comments { 
+  color: darkgrey;
+  text-align: left;
+  margin-bottom: 0.1em;
+  padding-bottom: 0;
+}
+
+ul.comments li.comment {
+  padding: 0;
+  margin-left: 0;
+}
+
+.comments-form {
+  border-top: 1px solid lightgrey;
+  text-align: left;
+  padding-left: 0.25em;
+  padding-right: 0.5em;
+}
+
+.comments-form input {
+  border: none;
+  margin-top: 0.25em;
+  margin-bottom: 0.25em;
+  padding-top: 0.5em;
+  padding-bottom: 0.5em;
+}
+
+.button {
+  float: right;
+  background: skyblue;
+  color: white;
+  border-radius: 0.25em;
+  margin-top: 0.5em;
+  border: none;
+  width: 5em;
+}
+
+.feed-error {
+  border: 1px solid red;
+  background : pink;
+  color: black;
+  padding: 1em;
+  text-align: left;
+  margin-left: 0.5em;
+  margin-right: 0.5em;
+  margin-bottom: 2em;
+}
