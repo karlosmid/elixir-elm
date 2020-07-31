@@ -1,13 +1,29 @@
 module Picshare exposing (main)
--- 3. expose from Html Module h1 function
-import Html exposing (Html, div, text, h1)
--- 1. import Html.Attributes module function class. class html attribute
--- tells browser which css to use for element owner of class attribute
-import Html.Attributes exposing (class)
+-- 1. expose all Html Module functions
+import Html exposing (..)
+-- 2. expose additional attribute src that we use in img element 
+import Html.Attributes exposing (class, src)
 
 main : Html msg
 main =
--- 2. use class header for our root div element
-    div [ class "header" ]
--- 4. make text function child of h1 function, note that h1 attribute list is empty
-    [ h1 [] [text "Picshare"] ]
+-- 3. add root div element that is start of virtual DOM tree.
+-- Virtual DOM can have only one root element.
+    div []
+    [
+        div [ class "header" ]
+            [ h1 [] [text "Picshare"] ],
+        -- 4. add div as child of root div with css class content-flow
+        div [ class "content-flow"]
+        -- 5. div with css class detailed-photo as child of div content-flow
+            [ div [ class "detaile-photo" ]
+                [
+                -- 6. img as child of div detailed-photo,
+                -- with src attribute to image url and no child elements
+                img [ src "https://www.hps.hr/files/data/27/kuce.folder/planinarska-kuca-picelj.jpg" ] [],
+                -- 7. div as second child of div detailed-photo with css class photo-info
+                div [ class "photo-info"]
+                    -- 8. h2 with css style captionn as child of photo-info
+                    [ h2 [ class "aption" ] [ text "Picelj Park Near Zabok"] ]
+                ]
+            ]
+        ]
