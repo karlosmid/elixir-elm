@@ -14,12 +14,8 @@ end
 
 defmodule Salary do
   defmodule Contract do
-    def developer do
-      3400
-    end
-
-    def developer(rate) do
-      developer()*rate
+    def developer(rate\\1) do
+      3400*rate
     end
   end
 end
