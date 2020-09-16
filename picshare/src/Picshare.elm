@@ -1,13 +1,10 @@
 module Picshare exposing (main)
 import Html exposing (..)
--- 8. import Events module
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (class, src)
--- 10 . msg => Msg
 main : Html Msg
 main =
     view initialModel
--- 2. change view function annotation by adding liked and changing msg => Msg type
 view : { url : String, caption : String, liked: Bool } -> Html Msg
 view model =
     div []
@@ -17,16 +14,13 @@ view model =
         div [ class "content-flow"]
             [ viewDetailedPhoto model]
     ]
--- 9. define message type
 type Msg
     = Like
     | Unlike
 
--- 3. change annotation because view function annotation changed
 viewDetailedPhoto : { url : String, caption : String, liked: Bool } -> Html Msg
 viewDetailedPhoto  model =
     let
-    -- 4. create button class value based on model liked attribute value
         buttonClass = --
             if model.liked then
                 "fa-heart"
@@ -42,13 +36,10 @@ viewDetailedPhoto  model =
         [
         img [ src model.url ] []
         , div [ class "photo-info"]
-        -- 5. this is html for like button
           [ div [ class "like-button" ]
-            -- 6. heart icon that is changed on click like/unlike
             [ i --
               [ class "fa fa-2x" --
               , class buttonClass --
-              -- 7. we use onClick function from Events module
               , onClick msg --
               ]
               []
@@ -56,9 +47,25 @@ viewDetailedPhoto  model =
             , h2 [ class "caption" ] [ text model.caption]
           ]
         ]
+-- 1. type annotation for update function
+update :
+-- 2. input is Msg Uniton Type
+  Msg
+-- 3. output are two same annotations for record models 
+    -> { url : String, caption : String, liked : Bool }
+    -> { url : String, caption : String, liked : Bool }
+update msg model =
+-- 4. welcome to pattern matching, case keyword, input is message
+  case msg of
+-- 5. if message is Like, update in record model liked to value True
+    Like ->
+      { model | liked = True }
+-- 6. if message is Unlike, update in record model liked to value False
+-- 7.   Unlike ->
+-- 7.   { model | liked = False }
+
 baseUrl : String
 baseUrl = "https://www.hps.hr/files/data/"
--- 1. add liked as Bool and set default to False. This is where we store like/unlike button clicks
 initialModel : { url : String, caption : String, liked : Bool }
 initialModel = 
     { url = baseUrl ++ "27/kuce.folder/planinarska-kuca-picelj.jpg"
