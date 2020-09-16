@@ -61,8 +61,8 @@ update msg model =
     Like ->
       { model | liked = True }
 -- 6. if message is Unlike, update in record model liked to value False
--- 7.   Unlike ->
--- 7.   { model | liked = False }
+    Unlike ->
+      { model | liked = False }
 
 baseUrl : String
 baseUrl = "https://www.hps.hr/files/data/"
