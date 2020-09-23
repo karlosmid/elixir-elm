@@ -1,10 +1,18 @@
 module Picshare exposing (main)
+-- 1. we need Browser module
+import Browser
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Html.Attributes exposing (class, src)
-main : Html Msg
+-- 2. rewrite main annotation type
+main : Program () {url: String, caption: String, liked: Bool } Msg
+-- 3. and main constant
 main =
-    view initialModel
+    Browser.sandbox
+    { init = initialModel
+    , view = view
+    , update = update
+    }
 view : { url : String, caption : String, liked: Bool } -> Html Msg
 view model =
     div []
@@ -47,20 +55,14 @@ viewDetailedPhoto  model =
             , h2 [ class "caption" ] [ text model.caption]
           ]
         ]
--- 1. type annotation for update function
 update :
--- 2. input is Msg Uniton Type
   Msg
--- 3. output are two same annotations for record models 
     -> { url : String, caption : String, liked : Bool }
     -> { url : String, caption : String, liked : Bool }
 update msg model =
--- 4. welcome to pattern matching, case keyword, input is message
   case msg of
--- 5. if message is Like, update in record model liked to value True
     Like ->
       { model | liked = True }
--- 6. if message is Unlike, update in record model liked to value False
     Unlike ->
       { model | liked = False }
 
