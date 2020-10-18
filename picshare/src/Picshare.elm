@@ -2,11 +2,15 @@ module Picshare exposing (main)
 import Browser
 import Html exposing (..)
 import Html.Events exposing (onClick)
-import Html.Attributes exposing (class, src)
+-- 3. expose from Html.Attributes modeul placeholder and type_ functions
+import Html.Attributes exposing (class, src, placeholder, type_)
 type alias Model = 
   { url : String
   , caption : String
   , liked : Bool
+  -- 1. add list of comments and newComments currently typed by the user.
+  , comments : List String
+  , newComment : String
   }
 main : Program () Model Msg
 main =
@@ -24,10 +28,8 @@ view model =
         div [ class "content-flow"]
             [ viewDetailedPhoto model]
     ]
--- 1. refactor constructor of Msg type
 type Msg
     = ToggleLike
--- 2. extract view logic in separate function
 viewLoveButton : Model -> Html Msg
 viewLoveButton model =
   let
@@ -45,22 +47,54 @@ viewLoveButton model =
     ]
     []
   ]
+-- 3. add function that displays one comment
+viewComment : String -> Html Msg
+viewComment comment =
+  li []
+    [ strong [] [ text "Comment:" ]
+    , text (" " ++ comment)
+    ]
+-- 4. add function that displays list of comments
+viewCommentList : List String -> Html Msg
+viewCommentList comments =
+  case comments of
+    [] ->
+      text ""
+    _ ->
+        div [ class "comments" ]
+          [ ul []
+            (List.map viewComment comments)
+          ]
+-- 5. add viewComments view function that will display comments and input comment
+viewComments : Model -> Html Msg
+viewComments model =
+  div []
+    [ viewCommentList model.comments
+    , form [ class "new-comment" ]
+      [ input
+        [ type_ "text"
+        , placeholder "Add a comment..."
+        ]
+        []
+      , button [] [ text "Save" ]
+      ]
+    ]
 viewDetailedPhoto : Model -> Html Msg
 viewDetailedPhoto  model =
-    div [ class "detaile-photo" ]
+    div [ class "detailed-photo" ]
         [
         img [ src model.url ] []
         , div [ class "photo-info"]
-  -- 3. call viewLoveButton with model as argument
             [ viewLoveButton model
             , h2 [ class "caption" ] [ text model.caption]
+            -- 6. add viewCommets to display comments and input comment text filed.
+            , viewComments model
           ]
         ]
 update :
   Msg
     -> Model
     -> Model
-  --4. update function handles ToggleLike logic
 update msg model =
   case msg of
     ToggleLike ->
@@ -73,4 +107,7 @@ initialModel =
     { url = baseUrl ++ "27/kuce.folder/planinarska-kuca-picelj.jpg"
       , caption = "Picelj Park Near Zabok"
       , liked = False
+  -- 2. add two Model attributes to initial model.
+      , comments = [ "Really nice place!" ]
+      , newComment = ""
     }
