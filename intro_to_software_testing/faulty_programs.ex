@@ -7,10 +7,10 @@ defmodule IntroToSoftwareTesting.FaultyPrograms do
   If there is no such element, returns -1
   """
   @spec findLast(list(), integer()) :: integer()
-  def findLast(x, y), do: findLastRecursive(x, y, 0)
-  defp findLastRecursive([], _y, _index), do: -1
-  defp findLastRecursive([head | _tail] = _x, y, index) when head == y, do: index
-  defp findLastRecursive([_head | tail] = _x, y, index), do: findLastRecursive(tail, y, index + 1)
+  def findLast(x, y), do: findLastRecursive(x, y, 0, -1)
+  defp findLastRecursive([], _y, _index, result), do: result
+  defp findLastRecursive([head | tail], y, index, _result) when head == y, do: findLastRecursive(tail, y, index + 1, index)
+  defp findLastRecursive([head | tail], y, index, result), do: findLastRecursive(tail, y, index + 1, result)
 
   @doc """
   lastZero returns index of last zero element in x.
