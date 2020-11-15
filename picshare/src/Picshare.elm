@@ -1,17 +1,25 @@
 module Picshare exposing (main)
 import Browser
 import Html exposing (..)
-import Html.Events exposing (onClick)
--- 3. expose from Html.Attributes modeul placeholder and type_ functions
-import Html.Attributes exposing (class, src, placeholder, type_)
-type alias Model = 
-  { url : String
+import Html.Events exposing (onClick, onInput, onSubmit)
+import Html.Attributes exposing (class, src, placeholder, type_, disabled, value)
+-- 1. add alias Id
+type alias Id =
+  Int
+-- 2. rename Model => Photo
+type alias Photo =
+-- 3. add id  attribute
+  { id : Id
+  , url : String
   , caption : String
   , liked : Bool
-  -- 1. add list of comments and newComments currently typed by the user.
   , comments : List String
   , newComment : String
   }
+-- 4. add Model alias for Photo type
+type alias Model =
+  Photo
+
 main : Program () Model Msg
 main =
     Browser.sandbox
@@ -30,6 +38,9 @@ view model =
     ]
 type Msg
     = ToggleLike
+    | UpdateComment String
+    | SaveComment
+
 viewLoveButton : Model -> Html Msg
 viewLoveButton model =
   let
@@ -47,14 +58,12 @@ viewLoveButton model =
     ]
     []
   ]
--- 3. add function that displays one comment
 viewComment : String -> Html Msg
 viewComment comment =
   li []
     [ strong [] [ text "Comment:" ]
     , text (" " ++ comment)
     ]
--- 4. add function that displays list of comments
 viewCommentList : List String -> Html Msg
 viewCommentList comments =
   case comments of
@@ -65,18 +74,21 @@ viewCommentList comments =
           [ ul []
             (List.map viewComment comments)
           ]
--- 5. add viewComments view function that will display comments and input comment
 viewComments : Model -> Html Msg
 viewComments model =
   div []
     [ viewCommentList model.comments
-    , form [ class "new-comment" ]
+    , form [ class "new-comment", onSubmit SaveComment]
       [ input
         [ type_ "text"
         , placeholder "Add a comment..."
+        , value model.newComment
+        , onInput UpdateComment
         ]
         []
-      , button [] [ text "Save" ]
+      , button
+        [ disabled (String.isEmpty model.newComment) ]
+        [ text "Save" ]
       ]
     ]
 viewDetailedPhoto : Model -> Html Msg
@@ -87,7 +99,6 @@ viewDetailedPhoto  model =
         , div [ class "photo-info"]
             [ viewLoveButton model
             , h2 [ class "caption" ] [ text model.caption]
-            -- 6. add viewCommets to display comments and input comment text filed.
             , viewComments model
           ]
         ]
@@ -99,15 +110,33 @@ update msg model =
   case msg of
     ToggleLike ->
       { model | liked = not model.liked }
+    UpdateComment comment ->
+      {model | newComment = comment }
+    SaveComment ->
+      saveNewComment model
+saveNewComment : Model -> Model
+saveNewComment model =
+  let
+    comment =
+      String.trim model.newComment
+  in
+    case comment of
+      "" -> model
+      _ ->
+        { model
+        | comments = model.comments ++ [ comment ]
+        , newComment = ""
+        }
 
 baseUrl : String
 baseUrl = "https://www.hps.hr/files/data/"
 initialModel : Model
 initialModel = 
-    { url = baseUrl ++ "27/kuce.folder/planinarska-kuca-picelj.jpg"
+-- 5. add id with value 1
+    { id = 1
+      , url = baseUrl ++ "27/kuce.folder/planinarska-kuca-picelj.jpg"
       , caption = "Picelj Park Near Zabok"
       , liked = False
-  -- 2. add two Model attributes to initial model.
       , comments = [ "Really nice place!" ]
       , newComment = ""
     }

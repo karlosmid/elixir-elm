@@ -4442,6 +4442,7 @@ var $author$project$Picshare$initialModel = {
 	caption: 'Picelj Park Near Zabok',
 	comments: _List_fromArray(
 		['Really nice place!']),
+	id: 1,
 	liked: false,
 	newComment: '',
 	url: $author$project$Picshare$baseUrl + '27/kuce.folder/planinarska-kuca-picelj.jpg'
@@ -5175,11 +5176,38 @@ var $elm$browser$Browser$sandbox = function (impl) {
 		});
 };
 var $elm$core$Basics$not = _Basics_not;
-var $author$project$Picshare$update = F2(
-	function (msg, model) {
+var $elm$core$String$trim = _String_trim;
+var $author$project$Picshare$saveNewComment = function (model) {
+	var comment = $elm$core$String$trim(model.newComment);
+	if (comment === '') {
+		return model;
+	} else {
 		return _Utils_update(
 			model,
-			{liked: !model.liked});
+			{
+				comments: _Utils_ap(
+					model.comments,
+					_List_fromArray(
+						[comment])),
+				newComment: ''
+			});
+	}
+};
+var $author$project$Picshare$update = F2(
+	function (msg, model) {
+		switch (msg.$) {
+			case 'ToggleLike':
+				return _Utils_update(
+					model,
+					{liked: !model.liked});
+			case 'UpdateComment':
+				var comment = msg.a;
+				return _Utils_update(
+					model,
+					{newComment: comment});
+			default:
+				return $author$project$Picshare$saveNewComment(model);
+		}
 	});
 var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
@@ -5202,11 +5230,81 @@ var $elm$html$Html$Attributes$src = function (url) {
 		'src',
 		_VirtualDom_noJavaScriptOrHtmlUri(url));
 };
+var $author$project$Picshare$SaveComment = {$: 'SaveComment'};
+var $author$project$Picshare$UpdateComment = function (a) {
+	return {$: 'UpdateComment', a: a};
+};
 var $elm$html$Html$button = _VirtualDom_node('button');
+var $elm$json$Json$Encode$bool = _Json_wrap;
+var $elm$html$Html$Attributes$boolProperty = F2(
+	function (key, bool) {
+		return A2(
+			_VirtualDom_property,
+			key,
+			$elm$json$Json$Encode$bool(bool));
+	});
+var $elm$html$Html$Attributes$disabled = $elm$html$Html$Attributes$boolProperty('disabled');
 var $elm$html$Html$form = _VirtualDom_node('form');
 var $elm$html$Html$input = _VirtualDom_node('input');
+var $elm$html$Html$Events$alwaysStop = function (x) {
+	return _Utils_Tuple2(x, true);
+};
+var $elm$virtual_dom$VirtualDom$MayStopPropagation = function (a) {
+	return {$: 'MayStopPropagation', a: a};
+};
+var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
+var $elm$html$Html$Events$stopPropagationOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayStopPropagation(decoder));
+	});
+var $elm$json$Json$Decode$field = _Json_decodeField;
+var $elm$json$Json$Decode$at = F2(
+	function (fields, decoder) {
+		return A3($elm$core$List$foldr, $elm$json$Json$Decode$field, decoder, fields);
+	});
+var $elm$json$Json$Decode$string = _Json_decodeString;
+var $elm$html$Html$Events$targetValue = A2(
+	$elm$json$Json$Decode$at,
+	_List_fromArray(
+		['target', 'value']),
+	$elm$json$Json$Decode$string);
+var $elm$html$Html$Events$onInput = function (tagger) {
+	return A2(
+		$elm$html$Html$Events$stopPropagationOn,
+		'input',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysStop,
+			A2($elm$json$Json$Decode$map, tagger, $elm$html$Html$Events$targetValue)));
+};
+var $elm$html$Html$Events$alwaysPreventDefault = function (msg) {
+	return _Utils_Tuple2(msg, true);
+};
+var $elm$virtual_dom$VirtualDom$MayPreventDefault = function (a) {
+	return {$: 'MayPreventDefault', a: a};
+};
+var $elm$html$Html$Events$preventDefaultOn = F2(
+	function (event, decoder) {
+		return A2(
+			$elm$virtual_dom$VirtualDom$on,
+			event,
+			$elm$virtual_dom$VirtualDom$MayPreventDefault(decoder));
+	});
+var $elm$html$Html$Events$onSubmit = function (msg) {
+	return A2(
+		$elm$html$Html$Events$preventDefaultOn,
+		'submit',
+		A2(
+			$elm$json$Json$Decode$map,
+			$elm$html$Html$Events$alwaysPreventDefault,
+			$elm$json$Json$Decode$succeed(msg)));
+};
 var $elm$html$Html$Attributes$placeholder = $elm$html$Html$Attributes$stringProperty('placeholder');
 var $elm$html$Html$Attributes$type_ = $elm$html$Html$Attributes$stringProperty('type');
+var $elm$html$Html$Attributes$value = $elm$html$Html$Attributes$stringProperty('value');
 var $elm$html$Html$ul = _VirtualDom_node('ul');
 var $elm$html$Html$li = _VirtualDom_node('li');
 var $elm$html$Html$strong = _VirtualDom_node('strong');
@@ -5256,7 +5354,8 @@ var $author$project$Picshare$viewComments = function (model) {
 				$elm$html$Html$form,
 				_List_fromArray(
 					[
-						$elm$html$Html$Attributes$class('new-comment')
+						$elm$html$Html$Attributes$class('new-comment'),
+						$elm$html$Html$Events$onSubmit($author$project$Picshare$SaveComment)
 					]),
 				_List_fromArray(
 					[
@@ -5265,12 +5364,18 @@ var $author$project$Picshare$viewComments = function (model) {
 						_List_fromArray(
 							[
 								$elm$html$Html$Attributes$type_('text'),
-								$elm$html$Html$Attributes$placeholder('Add a comment...')
+								$elm$html$Html$Attributes$placeholder('Add a comment...'),
+								$elm$html$Html$Attributes$value(model.newComment),
+								$elm$html$Html$Events$onInput($author$project$Picshare$UpdateComment)
 							]),
 						_List_Nil),
 						A2(
 						$elm$html$Html$button,
-						_List_Nil,
+						_List_fromArray(
+							[
+								$elm$html$Html$Attributes$disabled(
+								$elm$core$String$isEmpty(model.newComment))
+							]),
 						_List_fromArray(
 							[
 								$elm$html$Html$text('Save')
@@ -5283,7 +5388,6 @@ var $elm$html$Html$i = _VirtualDom_node('i');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
-var $elm$virtual_dom$VirtualDom$on = _VirtualDom_on;
 var $elm$html$Html$Events$on = F2(
 	function (event, decoder) {
 		return A2(
