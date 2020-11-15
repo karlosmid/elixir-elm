@@ -10,7 +10,7 @@ defmodule IntroToSoftwareTesting.FaultyPrograms do
   def findLast(x, y), do: findLastRecursive(x, y, 0, -1)
   defp findLastRecursive([], _y, _index, result), do: result
   defp findLastRecursive([head | tail], y, index, _result) when head == y, do: findLastRecursive(tail, y, index + 1, index)
-  defp findLastRecursive([head | tail], y, index, result), do: findLastRecursive(tail, y, index + 1, result)
+  defp findLastRecursive([_head | tail], y, index, result), do: findLastRecursive(tail, y, index + 1, result)
 
   @doc """
   lastZero returns index of last zero element in x.
