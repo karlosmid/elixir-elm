@@ -5,7 +5,6 @@ import Html.Events exposing (onClick, onInput, onSubmit)
 import Html.Attributes exposing (class, src, placeholder, type_, disabled, value)
 import Json.Decode exposing (Decoder, bool, int, list, string, succeed)
 import Json.Decode.Pipeline exposing (hardcoded, required)
--- 1. add http lib
 import Http
 type alias Id =
   Int
@@ -31,11 +30,18 @@ photoDecoder =
 
 main : Program () Model Msg
 main =
-    Browser.sandbox
-    { init = initialModel
+-- 1. replace sendbox wih element
+    Browser.element
+-- 2. replace init with init method. This method is first called when we start the application.
+    { init = init
     , view = view
     , update = update
+    , subscriptions = subscriptions
     }
+-- 3. init method takes no any parameter and returns tuple of Model and Cmd
+init : () -> ( Model, Cmd Msg)
+init () =
+  (initialModel, fetchFeed )
 view : Model -> Html Msg
 view model =
     div []
@@ -49,6 +55,8 @@ type Msg
     = ToggleLike
     | UpdateComment String
     | SaveComment
+-- 4. add message for HTTP get
+    | LoadFeed (Result Http.Error Photo)
 
 viewLoveButton : Model -> Html Msg
 viewLoveButton model =
@@ -114,15 +122,29 @@ viewDetailedPhoto  model =
 update :
   Msg
     -> Model
-    -> Model
+    -> ( Model, Cmd Msg )
+-- 5. update should return tuple with Model and Cmd
 update msg model =
   case msg of
     ToggleLike ->
-      { model | liked = not model.liked }
+      ( { model | liked = not model.liked }
+      , Cmd.none
+      )
     UpdateComment comment ->
-      {model | newComment = comment }
+      ( {model | newComment = comment }
+      , Cmd.none
+      )
     SaveComment ->
-      saveNewComment model
+      ( saveNewComment model
+      , Cmd.none
+      )
+-- 6. this is new message
+    LoadFeed _ ->
+      ( model, Cmd.none )
+-- 7. no operation subscription method
+subscriptions : Model -> Sub Msg
+subscriptions model =
+  Sub.none
 saveNewComment : Model -> Model
 saveNewComment model =
   let
@@ -138,20 +160,22 @@ saveNewComment model =
         }
 
 baseUrl : String
-baseUrl = "https://www.hps.hr/files/data/"
+-- 8. update baseUrl
+baseUrl = "https://programming-elm.com"
 initialModel : Model
 initialModel = 
     { id = 1
-      , url = baseUrl ++ "27/kuce.folder/planinarska-kuca-picelj.jpg"
+-- 9. update image sub url
+      , url = baseUrl ++ "/feed/1"
       , caption = "Picelj Park Near Zabok"
       , liked = False
       , comments = [ "Really nice place!" ]
       , newComment = ""
     }
--- 2. fetchFeed constant implementation
 fetchFeed : Cmd Msg
 fetchFeed =
   Http.get
-    { url = baseUrl ++ "27/kuce.folder/planinarska-kuca-picelj.jpg"
+-- 10. update image sub url
+    { url = baseUrl ++ "/feed/1"
     , expect = Http.expectJson LoadFeed photoDecoder
     }
