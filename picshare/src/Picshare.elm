@@ -17,7 +17,8 @@ type alias Photo =
   , newComment : String
   }
 type alias Model =
-  Photo
+-- 1. our model is record with photo filed that Maybe Photo type.
+  { photo : Maybe Photo }
 photoDecoder : Decoder Photo
 photoDecoder =
   succeed Photo
@@ -30,18 +31,24 @@ photoDecoder =
 
 main : Program () Model Msg
 main =
--- 1. replace sendbox wih element
     Browser.element
--- 2. replace init with init method. This method is first called when we start the application.
     { init = init
     , view = view
     , update = update
     , subscriptions = subscriptions
     }
--- 3. init method takes no any parameter and returns tuple of Model and Cmd
 init : () -> ( Model, Cmd Msg)
 init () =
   (initialModel, fetchFeed )
+-- 7. we need viewFeed to bridge 
+viewFeed : Maybe Photo -> Html Msg
+viewFeed maybePhoto =
+    case maybePhoto of
+        Just photo ->
+            viewDetailedPhoto photo
+        Nothing ->
+            text ""
+-- 8. use viewFeed function.
 view : Model -> Html Msg
 view model =
     div []
@@ -49,20 +56,20 @@ view model =
         div [ class "header" ]
             [ h1 [] [text "Picshare"] ],
         div [ class "content-flow"]
-            [ viewDetailedPhoto model]
+            [ viewFeed model.photo ]
     ]
 type Msg
     = ToggleLike
     | UpdateComment String
     | SaveComment
--- 4. add message for HTTP get
     | LoadFeed (Result Http.Error Photo)
-
-viewLoveButton : Model -> Html Msg
-viewLoveButton model =
+-- 3. Model => Photo because our Model could only have Photo value.
+-- argument name model => photo is cosmetic, but would help us to have more readable code
+viewLoveButton : Photo -> Html Msg
+viewLoveButton photo =
   let
     buttonClass =
-      if model.liked then
+      if photo.liked then
         "fa-heart"
       else
         "fa-heart-o"
@@ -91,91 +98,110 @@ viewCommentList comments =
           [ ul []
             (List.map viewComment comments)
           ]
-viewComments : Model -> Html Msg
-viewComments model =
+-- 4. Model => Photo because our Model could only have Photo value.
+-- argument name model => photo is cosmetic, but would help us to have more readable code
+viewComments : Photo -> Html Msg
+viewComments photo =
   div []
-    [ viewCommentList model.comments
+    [ viewCommentList photo.comments
     , form [ class "new-comment", onSubmit SaveComment]
       [ input
         [ type_ "text"
         , placeholder "Add a comment..."
-        , value model.newComment
+        , value photo.newComment
         , onInput UpdateComment
         ]
         []
       , button
-        [ disabled (String.isEmpty model.newComment) ]
+        [ disabled (String.isEmpty photo.newComment) ]
         [ text "Save" ]
       ]
     ]
-viewDetailedPhoto : Model -> Html Msg
-viewDetailedPhoto  model =
+-- 5. Model => Photo because our Model could only have Photo value.
+-- argument name model => photo is cosmetic, but would help us to have more readable code
+viewDetailedPhoto : Photo -> Html Msg
+viewDetailedPhoto  photo =
     div [ class "detailed-photo" ]
-        [
-        img [ src model.url ] []
-        , div [ class "photo-info"]
-            [ viewLoveButton model
-            , h2 [ class "caption" ] [ text model.caption]
-            , viewComments model
+        [ img [ src photo.url ] []
+        , div [ class "photo-info" ]
+            [ viewLoveButton photo 
+            , h2 [ class "caption" ] [ text photo.caption]
+            , viewComments photo 
           ]
         ]
-update :
-  Msg
-    -> Model
-    -> ( Model, Cmd Msg )
--- 5. update should return tuple with Model and Cmd
+-- 9. add toggleLike and updateComment functions in order to DRY your code
+toggleLike : Photo -> Photo
+toggleLike photo =
+    { photo | liked = not photo.liked }
+updateComment : String -> Photo -> Photo
+updateComment comment photo =
+    { photo | newComment = comment }
+-- 10. updateFeed bridges to Maybe Photo type
+updateFeed : (Photo -> Photo) -> Maybe Photo -> Maybe Photo
+updateFeed updatePhoto maybePhoto =
+-- new trick is Maybe.map function, it maps first argument function to second type
+-- it handles Just and Nothing out of the box
+    Maybe.map updatePhoto maybePhoto
+-- 11. use updateFeed to bridge model and Mybe type
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     ToggleLike ->
-      ( { model | liked = not model.liked }
+      ( { model
+          | photo = updateFeed toggleLike model.photo }
       , Cmd.none
       )
     UpdateComment comment ->
-      ( {model | newComment = comment }
+      ( { model
+          | photo = updateFeed (updateComment comment) model.photo
+        }
       , Cmd.none
       )
     SaveComment ->
-      ( saveNewComment model
+      ( { model 
+          | photo = updateFeed saveNewComment model.photo
+      }
       , Cmd.none
       )
--- 6. this is new message
     LoadFeed _ ->
       ( model, Cmd.none )
--- 7. no operation subscription method
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.none
-saveNewComment : Model -> Model
-saveNewComment model =
+-- 6. Model => Photo because our Model could only have Photo value.
+-- argument name model => photo is cosmetic, but would help us to have more readable code
+saveNewComment : Photo -> Photo
+saveNewComment photo =
   let
     comment =
-      String.trim model.newComment
+      String.trim photo.newComment
   in
     case comment of
-      "" -> model
+      "" -> photo
       _ ->
-        { model
-        | comments = model.comments ++ [ comment ]
+        { photo
+        | comments = photo.comments ++ [ comment ]
         , newComment = ""
         }
 
 baseUrl : String
--- 8. update baseUrl
 baseUrl = "https://programming-elm.com"
+--2. as Model is of type Maybe, we need to add Just
 initialModel : Model
 initialModel = 
-    { id = 1
--- 9. update image sub url
-      , url = baseUrl ++ "/feed/1"
-      , caption = "Picelj Park Near Zabok"
+    { photo = 
+    Just
+      { id = 1
+      , url = baseUrl ++ "/1.jpg"
+      , caption = "Surfing"
       , liked = False
       , comments = [ "Really nice place!" ]
       , newComment = ""
+      }
     }
 fetchFeed : Cmd Msg
 fetchFeed =
   Http.get
--- 10. update image sub url
     { url = baseUrl ++ "/feed/1"
     , expect = Http.expectJson LoadFeed photoDecoder
     }
