@@ -17,7 +17,6 @@ type alias Photo =
   , newComment : String
   }
 type alias Model =
--- 1. our model is record with photo filed that Maybe Photo type.
   { photo : Maybe Photo }
 photoDecoder : Decoder Photo
 photoDecoder =
@@ -40,7 +39,6 @@ main =
 init : () -> ( Model, Cmd Msg)
 init () =
   (initialModel, fetchFeed )
--- 7. we need viewFeed to bridge 
 viewFeed : Maybe Photo -> Html Msg
 viewFeed maybePhoto =
     case maybePhoto of
@@ -48,7 +46,6 @@ viewFeed maybePhoto =
             viewDetailedPhoto photo
         Nothing ->
             text ""
--- 8. use viewFeed function.
 view : Model -> Html Msg
 view model =
     div []
@@ -63,8 +60,6 @@ type Msg
     | UpdateComment String
     | SaveComment
     | LoadFeed (Result Http.Error Photo)
--- 3. Model => Photo because our Model could only have Photo value.
--- argument name model => photo is cosmetic, but would help us to have more readable code
 viewLoveButton : Photo -> Html Msg
 viewLoveButton photo =
   let
@@ -98,8 +93,6 @@ viewCommentList comments =
           [ ul []
             (List.map viewComment comments)
           ]
--- 4. Model => Photo because our Model could only have Photo value.
--- argument name model => photo is cosmetic, but would help us to have more readable code
 viewComments : Photo -> Html Msg
 viewComments photo =
   div []
@@ -117,8 +110,6 @@ viewComments photo =
         [ text "Save" ]
       ]
     ]
--- 5. Model => Photo because our Model could only have Photo value.
--- argument name model => photo is cosmetic, but would help us to have more readable code
 viewDetailedPhoto : Photo -> Html Msg
 viewDetailedPhoto  photo =
     div [ class "detailed-photo" ]
@@ -129,20 +120,15 @@ viewDetailedPhoto  photo =
             , viewComments photo 
           ]
         ]
--- 9. add toggleLike and updateComment functions in order to DRY your code
 toggleLike : Photo -> Photo
 toggleLike photo =
     { photo | liked = not photo.liked }
 updateComment : String -> Photo -> Photo
 updateComment comment photo =
     { photo | newComment = comment }
--- 10. updateFeed bridges to Maybe Photo type
 updateFeed : (Photo -> Photo) -> Maybe Photo -> Maybe Photo
 updateFeed updatePhoto maybePhoto =
--- new trick is Maybe.map function, it maps first argument function to second type
--- it handles Just and Nothing out of the box
     Maybe.map updatePhoto maybePhoto
--- 11. use updateFeed to bridge model and Mybe type
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
@@ -163,13 +149,17 @@ update msg model =
       }
       , Cmd.none
       )
-    LoadFeed _ ->
+-- 2. Handle LoadFeed messages
+    LoadFeed (Ok photo) ->
+      ( { model | photo = Just photo }
+      , Cmd.none
+      )
+    LoadFeed (Err _) ->
       ( model, Cmd.none )
+
 subscriptions : Model -> Sub Msg
 subscriptions model =
   Sub.none
--- 6. Model => Photo because our Model could only have Photo value.
--- argument name model => photo is cosmetic, but would help us to have more readable code
 saveNewComment : Photo -> Photo
 saveNewComment photo =
   let
@@ -186,19 +176,10 @@ saveNewComment photo =
 
 baseUrl : String
 baseUrl = "https://programming-elm.com"
---2. as Model is of type Maybe, we need to add Just
 initialModel : Model
+-- 1. Our initial model is no longer hardcoded Photo Record
 initialModel = 
-    { photo = 
-    Just
-      { id = 1
-      , url = baseUrl ++ "/1.jpg"
-      , caption = "Surfing"
-      , liked = False
-      , comments = [ "Really nice place!" ]
-      , newComment = ""
-      }
-    }
+    { photo = Nothing }
 fetchFeed : Cmd Msg
 fetchFeed =
   Http.get
