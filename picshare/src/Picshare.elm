@@ -1,4 +1,6 @@
 module Picshare exposing (main)
+-- 1. use WebSocket module
+import WebSocket
 import Browser
 import Html exposing (..)
 import Html.Events exposing (onClick, onInput, onSubmit)
@@ -16,10 +18,8 @@ type alias Photo =
   , comments : List String
   , newComment : String
   }
--- 1. new Feed alias
 type alias Feed =
   List Photo
--- 2. update Model alias to use new Feed alias
 type alias Model =
   { feed : Maybe Feed }
 
@@ -44,15 +44,12 @@ main =
 init : () -> ( Model, Cmd Msg)
 init () =
   (initialModel, fetchFeed )
---12. viewFeed must handle Photo Feed
 viewFeed : Maybe Feed -> Html Msg
 viewFeed maybePhoto =
     case maybePhoto of
---13. iterate over List of Photos and add place photos to div as container
         Just feed ->
             div [] (List.map viewDetailedPhoto feed)
         Nothing ->
---14. for now photos show loadig icon
             div [ class "loading-feed" ]
                 [ text "Loading Feed..." ]
 view : Model -> Html Msg
@@ -62,10 +59,8 @@ view model =
         div [ class "header" ]
             [ h1 [] [text "Picshare"] ],
         div [ class "content-flow"]
--- 15. photo => feed
             [ viewFeed model.feed ]
     ]
-  --5. LoadFeed functions returns Http error or Feed
 type Msg
     = ToggleLike
     | UpdateComment String
@@ -84,7 +79,6 @@ viewLoveButton photo =
   [ i
     [ class "fa fa-2x"
     , class buttonClass
--- 6. comment out so we can load multiply photos without breaking application
 --    , onClick ToggleLike 
     ]
     []
@@ -109,13 +103,11 @@ viewComments : Photo -> Html Msg
 viewComments photo =
   div []
     [ viewCommentList photo.comments
-  -- 7. comment out onSubmit with inline comment feature, 
     , form [ class "new-comment" {- , onSubmit SaveComment -}]
       [ input
         [ type_ "text"
         , placeholder "Add a comment..."
         , value photo.newComment
-  -- 8. comment out onInput
  --       , onInput UpdateComment
         ]
         []
@@ -146,7 +138,6 @@ updateFeed updatePhoto maybePhoto =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
---9. comment out pattern matches for all messages except for LoadFeed
 {-
     ToggleLike ->
       ( { model
@@ -165,14 +156,12 @@ update msg model =
       }
       , Cmd.none
       )-}
---10. photo => feed
     LoadFeed (Ok feed) ->
       ( { model | feed = Just feed }
       , Cmd.none
       )
     LoadFeed (Err _) ->
       ( model, Cmd.none )
--- 11. add match all because we removed matches for valid Picshare messages
     _ ->
       ( model, Cmd.none )
 
@@ -195,12 +184,10 @@ saveNewComment photo =
 
 baseUrl : String
 baseUrl = "https://programming-elm.com"
---3. photo => feed
 initialModel : Model
 initialModel = 
     { feed = Nothing }
 fetchFeed : Cmd Msg
---4. update url to receive feed endpoint that has multiply photos and LoadFeed takes list of json decoded photos
 fetchFeed =
   Http.get
     { url = baseUrl ++ "/feed"
