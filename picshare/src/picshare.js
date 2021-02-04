@@ -6164,33 +6164,43 @@ var $author$project$Picshare$initialModel = {feed: $elm$core$Maybe$Nothing};
 var $author$project$Picshare$init = function (_v0) {
 	return _Utils_Tuple2($author$project$Picshare$initialModel, $author$project$Picshare$fetchFeed);
 };
-var $elm$core$Platform$Sub$batch = _Platform_batch;
-var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
-var $author$project$Picshare$subscriptions = function (model) {
-	return $elm$core$Platform$Sub$none;
+var $author$project$Picshare$LoadStreamPhoto = function (a) {
+	return {$: 'LoadStreamPhoto', a: a};
 };
+var $author$project$WebSocket$receive = _Platform_incomingPort('receive', $elm$json$Json$Decode$string);
+var $author$project$Picshare$subscriptions = function (model) {
+	return $author$project$WebSocket$receive($author$project$Picshare$LoadStreamPhoto);
+};
+var $elm$json$Json$Encode$string = _Json_wrap;
+var $author$project$WebSocket$listen = _Platform_outgoingPort('listen', $elm$json$Json$Encode$string);
+var $elm$core$Debug$log = _Debug_log;
 var $elm$core$Platform$Cmd$batch = _Platform_batch;
 var $elm$core$Platform$Cmd$none = $elm$core$Platform$Cmd$batch(_List_Nil);
+var $author$project$Picshare$wsUrl = 'wss://programming-elm.com/';
 var $author$project$Picshare$update = F2(
 	function (msg, model) {
-		if (msg.$ === 'LoadFeed') {
-			if (msg.a.$ === 'Ok') {
-				var feed = msg.a.a;
-				return _Utils_Tuple2(
-					_Utils_update(
-						model,
-						{
-							feed: $elm$core$Maybe$Just(feed)
-						}),
-					$elm$core$Platform$Cmd$none);
-			} else {
+		switch (msg.$) {
+			case 'LoadFeed':
+				if (msg.a.$ === 'Ok') {
+					var feed = msg.a.a;
+					return _Utils_Tuple2(
+						_Utils_update(
+							model,
+							{
+								feed: $elm$core$Maybe$Just(feed)
+							}),
+						$author$project$WebSocket$listen($author$project$Picshare$wsUrl));
+				} else {
+					return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+				}
+			case 'LoadStreamPhoto':
+				var data = msg.a;
+				var _v1 = A2($elm$core$Debug$log, 'Websocket data', data);
 				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
-			}
-		} else {
-			return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
+			default:
+				return _Utils_Tuple2(model, $elm$core$Platform$Cmd$none);
 		}
 	});
-var $elm$json$Json$Encode$string = _Json_wrap;
 var $elm$html$Html$Attributes$stringProperty = F2(
 	function (key, string) {
 		return A2(

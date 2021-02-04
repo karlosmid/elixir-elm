@@ -8,6 +8,11 @@ import Html.Attributes exposing (class, src, placeholder, type_, disabled, value
 import Json.Decode exposing (Decoder, bool, int, list, string, succeed)
 import Json.Decode.Pipeline exposing (hardcoded, required)
 import Http
+
+--2. url to websocket server
+wsUrl : String
+wsUrl =
+    "wss://programming-elm.com/"
 type alias Id =
   Int
 type alias Photo =
@@ -66,6 +71,8 @@ type Msg
     | UpdateComment String
     | SaveComment
     | LoadFeed (Result Http.Error Feed)
+  -- 5. add LoadStreamPhoto message
+    | LoadStreamPhoto String
 viewLoveButton : Photo -> Html Msg
 viewLoveButton photo =
   let
@@ -158,16 +165,25 @@ update msg model =
       )-}
     LoadFeed (Ok feed) ->
       ( { model | feed = Just feed }
-      , Cmd.none
+-- 3. let's connect to websocket server, listen returns Elm Cmd
+      , WebSocket.listen wsUrl
       )
     LoadFeed (Err _) ->
       ( model, Cmd.none )
+      -- 6. handle LoadStreamPhoto message
+    LoadStreamPhoto data ->
+      let
+        _ =
+          Debug.log "Websocket data" data
+      in
+        ( model, Cmd.none )
     _ ->
       ( model, Cmd.none )
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-  Sub.none
+--4. receive websocket messages via subscription from outside world
+  WebSocket.receive LoadStreamPhoto
 saveNewComment : Photo -> Photo
 saveNewComment photo =
   let
