@@ -5,4 +5,5 @@ defmodule Vat do
   def price(%{country: :germany, price: price}), do: 1.19 * price
   def price(%{country: :greece, price: price}), do: 1.24 * price
   def price(%{country: :croatia, price: price}), do: 1.25 * price
+  def price(unknown), do: {:unknown_country_data, unknown}
 end
